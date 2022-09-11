@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "package": "nl.enjarai.recursiveresources.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+  ],
+  "client": [
+    "ExposeAbstractFileResourcePack",
+    "ExposeFormat3ResourcePack",
+    "ExposeFormat4ResourcePack",
+    "OptionsScreenMixin",
+    "PackListWidgetAccessor",
+    "ResourcePackEntryAccessor",
+    "ResourcePackManagerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

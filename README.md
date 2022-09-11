@@ -1,13 +1,15 @@
-# Resource Pack Organizer
+# Recursive Resources
 
-## Project license
+This is an indirect port of 
+[Resource Pack Organiser](https://github.com/chylex/Resource-Pack-Organizer) 
+to modern versions of Minecraft.
 
-The source code and binaries are released under [MPL 2.0](https://github.com/chylex/Resource-Pack-Organizer/blob/master/LICENSE).
+Recursive Resources is a fabric mod that revamps the vanilla resource pack screen
+to be more user-friendly with quality-of-life features like:
 
-The folder icon asset is made by FatCow (http://fatcow.com/free-icons) and licensed under [CC BY 3.0 US](https://creativecommons.org/licenses/by/3.0/us/legalcode).
+- Organize resource pack into folders that you can navigate from within the game
+- Choose between folder view (navigate in and out of folders) and flat view (packs from all folders shown in a single list)
+- Search pack names and description (supports the * wildcard)
+- Sort packs and folders alphabetically A-Z or Z-A
 
-## Project setup guide
-
-In order to setup a workspace to play around with the source code, first clone this repository using your Git client (make sure to select the correct branch, they are named by Minecraft versions; master is always the latest work in progress version).
-
-Once you cloned the repository, import the **Forge** or **Fabric** project into your development environment. You may need to run `gradlew genIntellijRuns` or `gradlew genEclipseRuns` if there are no run configurations after importing the project.
+![example](img/example.png)

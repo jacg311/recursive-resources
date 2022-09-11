@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "recursiveresources",
+  "version": "${version}",
+
+  "name": "Recursive Resources",
+  "description": "Enhances the Resource Pack menu by adding folder support for easier pack organization, ability to search packs by name or description, and new sorting options.",
+  "icon": "assets/recursiveresources/icon.png",
+  "authors": [
+    "enjarai",
+    "chylex"
+  ],
+  "contact": {
+    "homepage": "https://enjarai.nl",
+    "sources": "https://github.com/enjarai/recursive-resources",
+    "issues": "https://github.com/enjarai/recursive-resources/issues"
+  },
+
+  "license": "MPL-2.0",
+
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+    ]
+  },
+  "mixins": [
+    "recursiveresources.mixins.json"
+  ],
+  "accessWidener": "recursiveresources.accesswidener",
+
+  "depends": {
+    "minecraft": "1.18.2"
+  }
+}
