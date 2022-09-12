@@ -10,17 +10,22 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 public class FolderPack implements ResourcePackOrganizer.Pack {
-    private static final Identifier folderResource = new Identifier("recursiveresources:textures/gui/folder.png"); // http://www.iconspedia.com/icon/folion-icon-27237.html
+    private static final Identifier folderResource = new Identifier("recursiveresources:textures/gui/folder.png");
+    private static final Identifier openFolderResource = new Identifier("recursiveresources:textures/gui/folder_open.png");
 
     static {
         // for some reason the texture fails to load in the actual game
-        try (InputStream stream = FolderPack.class.getResourceAsStream("/assets/recursiveresources/textures/gui/folder.png")) {
-            MinecraftClient.getInstance().getTextureManager().registerTexture(folderResource, new NativeImageBackedTexture(NativeImage.read(stream)));
-        } catch (IOException e) {
+        loadTexture(folderResource, "/assets/recursiveresources/textures/gui/folder.png");
+        loadTexture(openFolderResource, "/assets/recursiveresources/textures/gui/folder_open.png");
+    }
+
+    private static void loadTexture(Identifier id, String path) {
+        try (InputStream stream = FolderPack.class.getResourceAsStream(path)) {
+            MinecraftClient.getInstance().getTextureManager().registerTexture(id, new NativeImageBackedTexture(NativeImage.read(stream)));
+        } catch (Exception e) {
             LogManager.getLogger(FolderPack.class).warn("Error loading folder texture:");
             e.printStackTrace();
         }
@@ -29,14 +34,20 @@ public class FolderPack implements ResourcePackOrganizer.Pack {
     private final Text displayName;
     private final Text description;
 
+    private boolean hovered = false;
+
     public FolderPack(Text displayName, Text description) {
         this.displayName = displayName;
         this.description = description;
     }
 
+    public void setHovered(boolean hovered) {
+        this.hovered = hovered;
+    }
+
     @Override
     public Identifier getIconId() {
-        return folderResource;
+        return hovered ? openFolderResource : folderResource;
     }
 
     @Override

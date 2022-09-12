@@ -11,6 +11,7 @@
     "OptionsScreenMixin",
     "PackListWidgetAccessor",
     "ResourcePackEntryAccessor",
+    "ResourcePackEntryMixin",
     "ResourcePackManagerMixin"
   ],
   "injectors": {
