@@ -1,1 +1,1 @@
-Initial release.
+- Give a folder a custom icon by putting an icon.png file inside it.
