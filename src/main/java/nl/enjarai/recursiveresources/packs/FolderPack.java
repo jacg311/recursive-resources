@@ -38,7 +38,7 @@ public class FolderPack implements ResourcePackOrganizer.Pack {
         if (iconFile.exists()) {
             try (InputStream stream = iconFile.toURI().toURL().openStream()) {
                 var relativePath = MinecraftClient.getInstance().getResourcePackDir().toURI().relativize(folder.toURI()).getPath();
-                Identifier id = new Identifier("recursiveresources:textures/gui/custom_folders/" + relativePath + ".png");
+                Identifier id = new Identifier("recursiveresources:textures/gui/custom_folders/" + relativePath + "icon.png");
                 MinecraftClient.getInstance().getTextureManager().registerTexture(id, new NativeImageBackedTexture(NativeImage.read(stream)));
                 return id;
             } catch (Exception e) {
