@@ -30,5 +30,12 @@
 
   "depends": {
     "minecraft": "1.18.2"
+  },
+
+  "custom": {
+    "projects": {
+      "modrinth": "CcL3MXyI",
+      "curseforge": 674907
+    }
   }
 }
