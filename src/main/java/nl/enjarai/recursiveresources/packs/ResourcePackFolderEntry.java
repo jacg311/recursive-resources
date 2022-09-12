@@ -5,7 +5,7 @@ import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.pack.PackListWidget;
 import net.minecraft.client.gui.screen.pack.PackListWidget.ResourcePackEntry;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import nl.enjarai.recursiveresources.gui.CustomResourcePackScreen;
 
 import java.io.File;
@@ -18,7 +18,7 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
     public final boolean isUp;
 
     public ResourcePackFolderEntry(MinecraftClient client, PackListWidget list, CustomResourcePackScreen ownerScreen, File folder, boolean isUp) {
-        super(client, list, ownerScreen, new FolderPack(new LiteralText(isUp ? upText : folder.getName()), new LiteralText(isUp ? "(Back)" : "(Folder)")));
+        super(client, list, ownerScreen, new FolderPack(Text.of(isUp ? upText : folder.getName()), Text.of(isUp ? "(Back)" : "(Folder)")));
         this.ownerScreen = ownerScreen;
         this.folder = folder;
         this.isUp = isUp;

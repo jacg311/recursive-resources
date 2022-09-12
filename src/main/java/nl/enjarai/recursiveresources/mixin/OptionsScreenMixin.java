@@ -4,7 +4,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.option.OptionsScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.resource.ResourcePackManager;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import nl.enjarai.recursiveresources.gui.CustomResourcePackScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -25,7 +25,7 @@ public abstract class OptionsScreenMixin {
         client.setScreen(new CustomResourcePackScreen(
                 (OptionsScreen) (Object) this, client.getResourcePackManager(),
                 this::refreshResourcePacks, client.getResourcePackDir(),
-                new TranslatableText("resourcePack.title")
+                Text.translatable("resourcePack.title")
         ));
     }
 }

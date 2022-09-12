@@ -11,7 +11,6 @@ import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.resource.ResourcePackManager;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import nl.enjarai.recursiveresources.packs.ResourcePackFolderEntry;
 import nl.enjarai.recursiveresources.packs.ResourcePackListProcessor;
 import nl.enjarai.recursiveresources.repository.ResourcePackUtils;
@@ -28,9 +27,6 @@ import static nl.enjarai.recursiveresources.repository.ResourcePackUtils.wrap;
 public class CustomResourcePackScreen extends PackScreen {
     private final MinecraftClient client = MinecraftClient.getInstance();
 
-    private final ResourcePackManager packManager;
-    private final Consumer<ResourcePackManager> applier;
-
     private final ResourcePackListProcessor listProcessor = new ResourcePackListProcessor(this::refresh);
     private Comparator<ResourcePackEntry> currentSorter;
 
@@ -43,8 +39,6 @@ public class CustomResourcePackScreen extends PackScreen {
 
     public CustomResourcePackScreen(Screen parent, ResourcePackManager packManager, Consumer<ResourcePackManager> applier, File file, Text title) {
         super(parent, packManager, applier, file, title);
-        this.packManager = packManager;
-        this.applier = applier;
     }
 
     // Components
@@ -54,8 +48,8 @@ public class CustomResourcePackScreen extends PackScreen {
         client.keyboard.setRepeatEvents(true);
         super.init();
 
-        var openFolderText = new TranslatableText("pack.openFolder");
-        var doneText = new TranslatableText("gui.done");
+        var openFolderText = Text.translatable("pack.openFolder");
+        var doneText = Text.translatable("gui.done");
 
         findButton(openFolderText).ifPresent(btn -> {
             btn.x = width / 2 + 25;
