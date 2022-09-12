@@ -25,4 +25,4 @@ Recursive Resources is a mod that revamps the vanilla resource pack menu to be m
 
 ## License
 
-This mod is under the [Mozilla Public License](LICENSE), version 3.0
+This mod is under the [Mozilla Public License](LICENSE), version 2.0
