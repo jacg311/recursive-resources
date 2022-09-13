@@ -9,7 +9,9 @@ import net.minecraft.resource.ResourcePackSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
+import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.io.InputStream;
 
 public class FolderPack implements ResourcePackOrganizer.Pack {
@@ -31,8 +33,31 @@ public class FolderPack implements ResourcePackOrganizer.Pack {
         }
     }
 
+    private static Identifier loadCustomIcon(File folder) {
+        File iconFile = new File(folder, "icon.png");
+        if (iconFile.exists()) {
+            try (InputStream stream = iconFile.toURI().toURL().openStream()) {
+                // Get the path relative to the resourcepacks directory
+                var relativePath = MinecraftClient.getInstance().getResourcePackDir().toURI().relativize(folder.toURI()).getPath();
+
+                // Ensure the path only contains "a-z0-9_.-" characters
+                relativePath = relativePath.replaceAll("[^a-zA-Z0-9_.-]", "_");
+
+                Identifier id = new Identifier("recursiveresources:textures/gui/custom_folders/" + relativePath + "icon.png");
+                MinecraftClient.getInstance().getTextureManager().registerTexture(id, new NativeImageBackedTexture(NativeImage.read(stream)));
+                return id;
+            } catch (Exception e) {
+                LogManager.getLogger(FolderPack.class).warn("Error loading custom folder icon:");
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
     private final Text displayName;
     private final Text description;
+    @Nullable
+    private Identifier icon = null;
 
     private boolean hovered = false;
 
@@ -41,13 +66,18 @@ public class FolderPack implements ResourcePackOrganizer.Pack {
         this.description = description;
     }
 
+    public FolderPack(Text displayName, Text description, File folder) {
+        this(displayName, description);
+        icon = loadCustomIcon(folder);
+    }
+
     public void setHovered(boolean hovered) {
         this.hovered = hovered;
     }
 
     @Override
     public Identifier getIconId() {
-        return hovered ? openFolderResource : folderResource;
+        return icon != null ? icon : (hovered ? openFolderResource : folderResource);
     }
 
     @Override

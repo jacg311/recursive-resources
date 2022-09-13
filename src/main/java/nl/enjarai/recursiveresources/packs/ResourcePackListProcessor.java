@@ -100,6 +100,6 @@ public class ResourcePackListProcessor {
     }
 
     private boolean checkFilter(String entryText) {
-        return textFilter == null || entryText.equals(ResourcePackFolderEntry.upText) || textFilter.matcher(entryText.toLowerCase(Locale.ENGLISH)).find();
+        return textFilter == null || entryText.equals(ResourcePackFolderEntry.UP_TEXT) || textFilter.matcher(entryText.toLowerCase(Locale.ENGLISH)).find();
     }
 }
