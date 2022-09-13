@@ -34,6 +34,11 @@ public class ResourcePackUtils {
         }
     }
 
+    public static boolean isChildOfFolder(File folder, ResourcePack pack) {
+        File packFolder = determinePackFolder(pack);
+        return packFolder != null && packFolder.getAbsolutePath().startsWith(folder.getAbsolutePath());
+    }
+
     public interface IExposedResourcePack {
         File getFileOrFolder();
     }

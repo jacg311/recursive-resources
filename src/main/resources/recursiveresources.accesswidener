@@ -18,4 +18,6 @@ accessible  method    net/minecraft/client/gui/screen/pack/PackScreen    refresh
 # Required for getting the path of a resource pack entry
 accessible  field    net/minecraft/client/gui/screen/pack/PackListWidget$ResourcePackEntry    pack    Lnet/minecraft/client/gui/screen/pack/ResourcePackOrganizer$Pack;
 
-accessible    field    net/minecraft/client/gui/screen/pack/ResourcePackOrganizer$AbstractPack    profile    Lnet/minecraft/resource/ResourcePackProfile;
+accessible  field    net/minecraft/client/gui/screen/pack/PackListWidget$ResourcePackEntry    widget    Lnet/minecraft/client/gui/screen/pack/PackListWidget;
+
+accessible  field    net/minecraft/client/gui/screen/pack/ResourcePackOrganizer$AbstractPack    profile    Lnet/minecraft/resource/ResourcePackProfile;

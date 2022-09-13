@@ -1,1 +1,3 @@
-- Give a folder a custom icon by putting an icon.png file inside it.
+- Added the ability to give a folder a custom icon by putting an icon.png file inside it.
+- Added a button to enable all resource packs in a folder at once.
+- Added buttons to easily enable/disable all resource packs.

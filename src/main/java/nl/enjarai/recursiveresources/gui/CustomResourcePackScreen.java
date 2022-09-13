@@ -9,6 +9,7 @@ import net.minecraft.client.gui.screen.pack.ResourcePackOrganizer;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.resource.ResourcePackManager;
 import net.minecraft.text.Text;
 import nl.enjarai.recursiveresources.packs.ResourcePackFolderEntry;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import static nl.enjarai.recursiveresources.packs.ResourcePackFolderEntry.WIDGETS_TEXTURE;
 import static nl.enjarai.recursiveresources.repository.ResourcePackUtils.wrap;
 
 public class CustomResourcePackScreen extends PackScreen {
@@ -77,22 +79,34 @@ public class CustomResourcePackScreen extends PackScreen {
             customAvailablePacks.setScrollAmount(0.0);
         }));
 
+        // Load all available packs button
+        addDrawableChild(new SilentTexturedButtonWidget(width / 2 - 204, 0, 32, 32, 0, 0, WIDGETS_TEXTURE, btn -> {
+            for (ResourcePackEntry entry : List.copyOf(availablePackList.children())) {
+                if (entry.pack.canBeEnabled()) {
+                    entry.pack.enable();
+                }
+            }
+        }));
+
+        // Unload all button
+        addDrawableChild(new SilentTexturedButtonWidget(width / 2 + 204 - 32, 0, 32, 32, 32, 0, WIDGETS_TEXTURE, btn -> {
+            for (ResourcePackEntry entry : List.copyOf(selectedPackList.children())) {
+                if (entry.pack.canBeDisabled()) {
+                    entry.pack.disable();
+                }
+            }
+        }));
+
         searchField = addDrawableChild(new TextFieldWidget(
                 textRenderer, width / 2 - 179, height - 46, 154, 16, searchField, Text.of("")));
         searchField.setFocusUnlocked(true);
         searchField.setChangedListener(listProcessor::setFilter);
         addDrawableChild(searchField);
 
+        // Replacing the available pack list with our custom implementation
         originalAvailablePacks = availablePackList;
-
-        if (originalAvailablePacks == null) {
-            client.setScreen(parent);
-            return;
-        }
-
         remove(originalAvailablePacks);
         addSelectableChild(customAvailablePacks = new PackListWidgetCustom(originalAvailablePacks, 200, height, width / 2 - 204));
-
         availablePackList = customAvailablePacks;
 
         listProcessor.pauseCallback();
