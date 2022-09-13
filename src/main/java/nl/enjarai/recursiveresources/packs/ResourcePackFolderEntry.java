@@ -27,7 +27,7 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
     public final List<ResourcePackEntry> children;
 
     public ResourcePackFolderEntry(MinecraftClient client, PackListWidget list, CustomResourcePackScreen ownerScreen, File folder, boolean isUp) {
-        super(client, list, ownerScreen, new FolderPack(new LiteralText(isUp ? upText : folder.getName()), new LiteralText(isUp ? "(Back)" : "(Folder)"), folder));
+        super(client, list, ownerScreen, new FolderPack(new LiteralText(isUp ? UP_TEXT : folder.getName()), new LiteralText(isUp ? "(Back)" : "(Folder)"), folder));
         this.ownerScreen = ownerScreen;
         this.folder = folder;
         this.isUp = isUp;
