@@ -72,15 +72,11 @@ jobs:
         with:
           path: gradle.properties
           property: minecraft_version
-      - name: Read CHANGELOG file
-        id: changelog
-        run: echo "::set-output name=contents::$(cat CHANGELOG.md)"
-      - name: Edit Release
-        uses: irongut/EditRelease@v1.2.0
+      - name: Update GitHub Release
+        uses: tubone24/update_release@v1.3.1
         with:
-          id: ${{ github.event.release.id }}
-          body: ${{ steps.changelog.outputs.contents }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          body_path: CHANGELOG.md
+          is_append_body: true
       - name: publish mod
         uses: Kir-Antipov/mc-publish@v3.2
         with:
