@@ -1,7 +1,6 @@
 package nl.enjarai.recursiveresources.packs;
 
 import net.minecraft.client.gui.screen.pack.PackListWidget.ResourcePackEntry;
-import nl.enjarai.recursiveresources.mixin.ResourcePackEntryAccessor;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Comparator;
@@ -12,11 +11,11 @@ import java.util.regex.Pattern;
 
 public class ResourcePackListProcessor {
     private static String name(ResourcePackEntry entry) {
-        return entry == null ? "<INVALID>" : ((ResourcePackEntryAccessor) entry).recursiveresources$getPack().getDisplayName().getString();
+        return entry == null ? "<INVALID>" : entry.pack.getDisplayName().getString();
     }
 
     private static String description(ResourcePackEntry entry) {
-        return entry == null ? "<INVALID>" : ((ResourcePackEntryAccessor) entry).recursiveresources$getPack().getDescription().getString();
+        return entry == null ? "<INVALID>" : entry.pack.getDescription().getString();
     }
 
     private static String nameSort(ResourcePackEntry entry, boolean reverse) {

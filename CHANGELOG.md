@@ -1,1 +1,1 @@
-- Fix small issue where icons wouldn't load for capitalized folders
+- Cleaned up some of the code, this shouldn't break things... in theory.
