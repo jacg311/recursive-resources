@@ -9,7 +9,6 @@ import net.minecraft.client.gui.screen.pack.ResourcePackOrganizer;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.resource.ResourcePackManager;
 import net.minecraft.text.Text;
 import nl.enjarai.recursiveresources.packs.ResourcePackFolderEntry;
@@ -17,6 +16,7 @@ import nl.enjarai.recursiveresources.packs.ResourcePackListProcessor;
 import nl.enjarai.recursiveresources.repository.ResourcePackUtils;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -27,6 +27,8 @@ import static nl.enjarai.recursiveresources.packs.ResourcePackFolderEntry.WIDGET
 import static nl.enjarai.recursiveresources.repository.ResourcePackUtils.wrap;
 
 public class CustomResourcePackScreen extends PackScreen {
+    private static final File ROOT_FOLDER = new File("");
+
     private final MinecraftClient client = MinecraftClient.getInstance();
 
     private final ResourcePackListProcessor listProcessor = new ResourcePackListProcessor(this::refresh);
@@ -36,11 +38,13 @@ public class CustomResourcePackScreen extends PackScreen {
     private PackListWidgetCustom customAvailablePacks;
     private TextFieldWidget searchField;
 
-    private File currentFolder = client.getResourcePackDir();
+    private File currentFolder = ROOT_FOLDER;
     private boolean folderView = true;
+    public final List<Path> roots;
 
-    public CustomResourcePackScreen(Screen parent, ResourcePackManager packManager, Consumer<ResourcePackManager> applier, File file, Text title) {
-        super(parent, packManager, applier, file, title);
+    public CustomResourcePackScreen(Screen parent, ResourcePackManager packManager, Consumer<ResourcePackManager> applier, File mainRoot, Text title, List<Path> roots) {
+        super(parent, packManager, applier, mainRoot, title);
+        this.roots = roots;
     }
 
     // Components
@@ -133,8 +137,13 @@ public class CustomResourcePackScreen extends PackScreen {
 
     // Processing
 
+    private File getParentFileSafe(File file) {
+        var parent = file.getParentFile();
+        return parent == null ? ROOT_FOLDER : parent;
+    }
+
     private boolean notInRoot() {
-        return folderView && !currentFolder.equals(client.getResourcePackDir());
+        return folderView && !currentFolder.equals(ROOT_FOLDER);
     }
 
     private void onFiltersUpdated() {
@@ -143,25 +152,47 @@ public class CustomResourcePackScreen extends PackScreen {
         if (folderView) {
             folders = new ArrayList<>();
 
+            // add a ".." entry when not in the root folder
             if (notInRoot()) {
-                folders.add(new ResourcePackFolderEntry(client, customAvailablePacks, this, currentFolder.getParentFile(), true));
+                folders.add(new ResourcePackFolderEntry(client, customAvailablePacks,
+                        this, getParentFileSafe(currentFolder), true));
             }
 
-            for (File folder : wrap(currentFolder.listFiles(ResourcePackUtils::isFolderButNotFolderBasedPack))) {
-                folders.add(new ResourcePackFolderEntry(client, customAvailablePacks, this, folder));
+            // create entries for all the folders that aren't packs
+            var createdFolders = new ArrayList<Path>();
+            for (Path root : roots) {
+                var absolute = root.resolve(currentFolder.toPath());
+
+                for (File folder : wrap(absolute.toFile().listFiles(ResourcePackUtils::isFolderButNotFolderBasedPack))) {
+                    var relative = root.relativize(folder.toPath().normalize());
+
+                    if (createdFolders.contains(relative)) {
+                        continue;
+                    }
+
+                    folders.add(new ResourcePackFolderEntry(client, customAvailablePacks,
+                            this, relative.toFile()));
+                    createdFolders.add(relative);
+                }
             }
         }
 
         listProcessor.apply(customAvailablePacks.children().stream().toList(), folders, customAvailablePacks.children());
 
+        // filter out all entries that aren't in the current folder
         if (folderView) {
             var filteredPacks = customAvailablePacks.children().stream().filter(entry -> {
+                // if it's a folder, it's already relative, so we can check easily
                 if (entry instanceof ResourcePackFolderEntry folder) {
-                    return folder.isUp || currentFolder.equals(folder.folder.getParentFile());
+                    return folder.isUp || currentFolder.equals(getParentFileSafe(folder.folder));
                 }
 
+                // if it's a pack, get the folder it's in and check that against all our roots
                 File file = ResourcePackUtils.determinePackFolder(((ResourcePackOrganizer.AbstractPack) entry.pack).profile.createResourcePack());
-                return file == null ? !notInRoot() : currentFolder.equals(file.getParentFile());
+                return file == null ? !notInRoot() : roots.stream().anyMatch((root) -> {
+                    var absolute = root.resolve(currentFolder.toPath());
+                    return absolute.toFile().equals(getParentFileSafe(file));
+                });
             }).toList();
 
             customAvailablePacks.children().clear();
