@@ -15,8 +15,7 @@ repositories {
         name "Terraformers Maven"
         url 'https://maven.terraformersmc.com'
     }
-    mavenLocal()
-//    maven { url 'https://jitpack.io' }
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -26,8 +25,7 @@ dependencies {
 
     modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 
-    modImplementation "nl.enjarai:shared-resources-api:1.0.0"
-//    modImplementation "com.github.enjarai:shared-resources:${project.shared_resources_version}"
+    modImplementation include("com.github.enjarai:shared-resources:${project.shared_resources_version}")
 }
 
 processResources {
