@@ -33,17 +33,16 @@ public class FolderPack implements ResourcePackOrganizer.Pack {
         }
     }
 
-    private static Identifier loadCustomIcon(File folder) {
-        File iconFile = new File(folder, "icon.png");
-        if (iconFile.exists()) {
-            try (InputStream stream = iconFile.toURI().toURL().openStream()) {
+    private static Identifier loadCustomIcon(File icon, File relativeFolder) {
+        if (icon != null && icon.exists()) {
+            try (InputStream stream = icon.toURI().toURL().openStream()) {
                 // Get the path relative to the resourcepacks directory
-                var relativePath = MinecraftClient.getInstance().getResourcePackDir().toURI().relativize(folder.toURI()).getPath();
+                var relativePath = relativeFolder.toString();
 
                 // Ensure the path only contains "a-z0-9_.-" characters
                 relativePath = relativePath.toLowerCase().replaceAll("[^a-zA-Z0-9_.-]", "_");
 
-                Identifier id = new Identifier("recursiveresources:textures/gui/custom_folders/" + relativePath + "icon.png");
+                Identifier id = new Identifier("recursiveresources", "textures/gui/custom_folders/" + relativePath + "icon.png");
                 MinecraftClient.getInstance().getTextureManager().registerTexture(id, new NativeImageBackedTexture(NativeImage.read(stream)));
                 return id;
             } catch (Exception e) {
@@ -66,9 +65,9 @@ public class FolderPack implements ResourcePackOrganizer.Pack {
         this.description = description;
     }
 
-    public FolderPack(Text displayName, Text description, File folder) {
+    public FolderPack(Text displayName, Text description, File folder, File relativeFolder) {
         this(displayName, description);
-        icon = loadCustomIcon(folder);
+        icon = loadCustomIcon(folder, relativeFolder);
     }
 
     public void setHovered(boolean hovered) {

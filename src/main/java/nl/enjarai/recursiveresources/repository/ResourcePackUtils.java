@@ -1,5 +1,8 @@
 package nl.enjarai.recursiveresources.repository;
 
+import net.minecraft.client.resource.Format3ResourcePack;
+import net.minecraft.client.resource.Format4ResourcePack;
+import net.minecraft.resource.AbstractFileResourcePack;
 import net.minecraft.resource.DirectoryResourcePack;
 import net.minecraft.resource.ResourcePack;
 import net.minecraft.resource.ZipResourcePack;
@@ -21,14 +24,15 @@ public class ResourcePackUtils {
         return folder.isDirectory() && !isFolderBasedPack(folder);
     }
 
-    @SuppressWarnings("ConstantConditions")
     public static File determinePackFolder(ResourcePack pack) {
         Class<? extends ResourcePack> cls = pack.getClass();
 
         if (cls == ZipResourcePack.class || cls == DirectoryResourcePack.class) {
-            return ((IExposedResourcePack) pack).getFileOrFolder();
-        } else if (pack instanceof IExposedResourcePackDelegate) {
-            return determinePackFolder(((IExposedResourcePackDelegate) pack).getDelegate());
+            return ((AbstractFileResourcePack) pack).base;
+        } else if (pack instanceof Format3ResourcePack compatPack) {
+            return determinePackFolder(compatPack.parent);
+        } else if (pack instanceof Format4ResourcePack compatPack) {
+            return determinePackFolder(compatPack.parent);
         } else {
             return null;
         }
@@ -37,13 +41,5 @@ public class ResourcePackUtils {
     public static boolean isChildOfFolder(File folder, ResourcePack pack) {
         File packFolder = determinePackFolder(pack);
         return packFolder != null && packFolder.getAbsolutePath().startsWith(folder.getAbsolutePath());
-    }
-
-    public interface IExposedResourcePack {
-        File getFileOrFolder();
-    }
-
-    public interface IExposedResourcePackDelegate {
-        ResourcePack getDelegate();
     }
 }

@@ -5,12 +5,7 @@
   "mixins": [
   ],
   "client": [
-    "ExposeAbstractFileResourcePack",
-    "ExposeFormat3ResourcePack",
-    "ExposeFormat4ResourcePack",
     "OptionsScreenMixin",
-    "PackListWidgetAccessor",
-    "ResourcePackEntryAccessor",
     "ResourcePackManagerMixin"
   ],
   "injectors": {

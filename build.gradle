@@ -15,6 +15,7 @@ repositories {
         name "Terraformers Maven"
         url 'https://maven.terraformersmc.com'
     }
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -23,6 +24,8 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+
+    modImplementation include("com.github.enjarai:shared-resources:${project.shared_resources_version}")
 }
 
 processResources {

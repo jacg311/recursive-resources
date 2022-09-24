@@ -9,8 +9,8 @@ import java.io.File;
 import java.util.function.Consumer;
 
 public class NestedFolderPackFinder implements ResourcePackProvider {
-    private final File root;
-    private final int rootLength;
+    protected File root;
+    protected int rootLength;
 
     public NestedFolderPackFinder(File root) {
         this.root = root;

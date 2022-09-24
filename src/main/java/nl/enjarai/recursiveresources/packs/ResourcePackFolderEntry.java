@@ -8,11 +8,13 @@ import net.minecraft.client.gui.screen.pack.PackListWidget.ResourcePackEntry;
 import net.minecraft.client.gui.screen.pack.ResourcePackOrganizer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import nl.enjarai.recursiveresources.RecursiveResources;
 import nl.enjarai.recursiveresources.gui.CustomResourcePackScreen;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 
 import static nl.enjarai.recursiveresources.repository.ResourcePackUtils.isChildOfFolder;
@@ -26,8 +28,27 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
     public final boolean isUp;
     public final List<ResourcePackEntry> children;
 
+    private static File findIconFile(List<Path> roots, File folder) {
+        for (var root : roots) {
+            var iconFile = root
+                    .resolve(folder.toPath())
+                    .resolve("icon.png")
+                    .toFile();
+
+            if (iconFile.exists()) return iconFile;
+        }
+        return null;
+    }
+
     public ResourcePackFolderEntry(MinecraftClient client, PackListWidget list, CustomResourcePackScreen ownerScreen, File folder, boolean isUp) {
-        super(client, list, ownerScreen, new FolderPack(new LiteralText(isUp ? UP_TEXT : folder.getName()), new LiteralText(isUp ? "(Back)" : "(Folder)"), folder));
+        super(client, list, ownerScreen,
+                new FolderPack(
+                        Text.of(isUp ? UP_TEXT : folder.getName()),
+                        Text.of(isUp ? "(Back)" : "(Folder)"),
+                        findIconFile(ownerScreen.roots, folder),
+                        folder
+                )
+        );
         this.ownerScreen = ownerScreen;
         this.folder = folder;
         this.isUp = isUp;
@@ -91,7 +112,9 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
                 .filter(entry -> !(entry instanceof ResourcePackFolderEntry))
                 .filter(entry -> {
                     var resourcePack = ((ResourcePackOrganizer.AbstractPack) entry.pack).profile.createResourcePack();
-                    return isChildOfFolder(folder, resourcePack);
+                    return ownerScreen.roots.stream().anyMatch((root) ->
+                            isChildOfFolder(root.resolve(folder.toPath()).toFile(), resourcePack)
+                    );
                 })
                 .toList();
     }

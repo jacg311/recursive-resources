@@ -1,9 +1,13 @@
 package nl.enjarai.recursiveresources.mixin;
 
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.resource.ResourcePackManager;
 import net.minecraft.resource.ResourcePackProvider;
+import nl.enjarai.recursiveresources.compat.shared_resources.ExternalNestedFolderPackFinder;
 import nl.enjarai.recursiveresources.repository.NestedFolderPackFinder;
+import nl.enjarai.shared_resources.api.DefaultGameResources;
+import nl.enjarai.shared_resources.api.GameResourceHelper;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -12,9 +16,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Mixin(ResourcePackManager.class)
 public abstract class ResourcePackManagerMixin {
@@ -33,7 +36,13 @@ public abstract class ResourcePackManagerMixin {
         if (providers.stream().anyMatch(provider -> provider == MinecraftClient.getInstance().getResourcePackProvider())) {
             var client = MinecraftClient.getInstance();
 
-            providers = Stream.concat(providers.stream(), Stream.of(new NestedFolderPackFinder(client.getResourcePackDir()))).collect(Collectors.toSet());
+            providers = new HashSet<>(providers);
+            providers.add(new NestedFolderPackFinder(client.getResourcePackDir()));
+
+            // Load shared resources compat if present
+            if (FabricLoader.getInstance().isModLoaded("shared-resources")) {
+                providers.add(new ExternalNestedFolderPackFinder(() -> GameResourceHelper.getPathFor(DefaultGameResources.RESOURCEPACKS)));
+            }
         }
     }
 }

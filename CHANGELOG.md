@@ -1,1 +1,2 @@
-- Fix small issue where icons wouldn't load for capitalized folders
+- Added compatibility with Shared Resources.
+- Cleaned up some of the code, this shouldn't break things... in theory.
