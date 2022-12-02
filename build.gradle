@@ -58,3 +58,26 @@ jar {
 loom {
 	accessWidenerPath = file("src/main/resources/recursiveresources.accesswidener")
 }
+
+publishing {
+    repositories {
+        maven {
+            name = "enjaraiMaven"
+            url = "https://maven.enjarai.nl/releases"
+            credentials(PasswordCredentials)
+            authentication {
+                basic(BasicAuthentication)
+            }
+        }
+    }
+
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = project.maven_group
+            artifactId = archivesBaseName
+            version = project.version
+
+            from components.java
+        }
+    }
+}
