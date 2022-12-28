@@ -2,8 +2,8 @@ package nl.enjarai.recursiveresources.mixin;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.OptionsScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.resource.ResourcePackManager;
 import net.minecraft.text.Text;
 import nl.enjarai.recursiveresources.gui.CustomResourcePackScreen;
@@ -15,7 +15,6 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.List;
 
 @Mixin(OptionsScreen.class)
 public abstract class OptionsScreenMixin {
@@ -27,10 +26,10 @@ public abstract class OptionsScreenMixin {
      * @reason Replace the resource packs screen with a custom one.
      */
     @Overwrite
-    private void method_19824(ButtonWidget button) {
+    private Screen method_47631() {
         var client = MinecraftClient.getInstance();
         var packRoots = new ArrayList<Path>();
-        packRoots.add(client.getResourcePackDir().toPath());
+        packRoots.add(client.getResourcePackDir());
 
         if (FabricLoader.getInstance().isModLoaded("shared-resources")) {
             var directory = GameResourceHelper.getPathFor(DefaultGameResources.RESOURCEPACKS);
@@ -40,11 +39,11 @@ public abstract class OptionsScreenMixin {
             }
         }
 
-        client.setScreen(new CustomResourcePackScreen(
+        return new CustomResourcePackScreen(
                 (OptionsScreen) (Object) this, client.getResourcePackManager(),
-                this::refreshResourcePacks, client.getResourcePackDir(),
+                this::refreshResourcePacks, client.getResourcePackDir().toFile(),
                 Text.translatable("resourcePack.title"),
                 packRoots
-        ));
+        );
     }
 }

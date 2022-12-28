@@ -23,8 +23,7 @@ public class ResourcePackListProcessor {
         String pfx2 = !reverse ? "b" : "y";
         String pfx3 = !reverse ? "x" : "a";
 
-        if (entry instanceof ResourcePackFolderEntry) {
-            ResourcePackFolderEntry folder = (ResourcePackFolderEntry) entry;
+        if (entry instanceof ResourcePackFolderEntry folder) {
             return (folder.isUp ? pfx1 : pfx2) + name(folder); // sort folders first
         } else {
             return pfx3 + name(entry);

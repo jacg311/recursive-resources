@@ -2,6 +2,7 @@ package nl.enjarai.recursiveresources.mixin;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.resource.DefaultClientResourcePackProvider;
 import net.minecraft.resource.ResourcePackManager;
 import net.minecraft.resource.ResourcePackProvider;
 import nl.enjarai.recursiveresources.compat.shared_resources.ExternalNestedFolderPackFinder;
@@ -27,17 +28,17 @@ public abstract class ResourcePackManagerMixin {
     private Set<ResourcePackProvider> providers;
 
     @Inject(
-            method = "<init>(Lnet/minecraft/resource/ResourcePackProfile$Factory;[Lnet/minecraft/resource/ResourcePackProvider;)V",
+            method = "<init>([Lnet/minecraft/resource/ResourcePackProvider;)V",
             at = @At("RETURN")
     )
     private void recursiveresources$onInit(CallbackInfo ci) {
         // Only add our own provider if this is the manager of client
         // resource packs, we wouldn't want to mess with datapacks
-        if (providers.stream().anyMatch(provider -> provider == MinecraftClient.getInstance().getResourcePackProvider())) {
+        if (providers.stream().anyMatch(DefaultClientResourcePackProvider.class::isInstance)) {
             var client = MinecraftClient.getInstance();
 
             providers = new HashSet<>(providers);
-            providers.add(new NestedFolderPackFinder(client.getResourcePackDir()));
+            providers.add(new NestedFolderPackFinder(client.getResourcePackDir().toFile()));
 
             // Load shared resources compat if present
             if (FabricLoader.getInstance().isModLoaded("shared-resources")) {

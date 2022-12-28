@@ -82,7 +82,7 @@ public class FolderPack implements ResourcePackOrganizer.Pack {
 
     @Override
     public ResourcePackSource getSource() {
-        return ResourcePackSource.PACK_SOURCE_NONE;
+        return ResourcePackSource.NONE;
     }
 
     @Override

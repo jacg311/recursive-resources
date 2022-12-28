@@ -43,7 +43,7 @@ public class CustomResourcePackScreen extends PackScreen {
     public final List<Path> roots;
 
     public CustomResourcePackScreen(Screen parent, ResourcePackManager packManager, Consumer<ResourcePackManager> applier, File mainRoot, Text title, List<Path> roots) {
-        super(parent, packManager, applier, mainRoot, title);
+        super(parent, packManager, applier, mainRoot.toPath(), title);
         this.roots = roots;
     }
 
@@ -51,37 +51,48 @@ public class CustomResourcePackScreen extends PackScreen {
 
     @Override
     protected void init() {
-        client.keyboard.setRepeatEvents(true);
         super.init();
 
         var openFolderText = Text.translatable("pack.openFolder");
         var doneText = Text.translatable("gui.done");
 
         findButton(openFolderText).ifPresent(btn -> {
-            btn.x = width / 2 + 25;
-            btn.y = height - 48;
+            btn.setX(width / 2 + 25);
+            btn.setY(height - 48);
         });
 
         findButton(doneText).ifPresent(btn -> {
-            btn.x = width / 2 + 25;
-            btn.y = height - 26;
+            btn.setX(width / 2 + 25);
+            btn.setY(height - 26);
         });
 
-        addDrawableChild(new ButtonWidget(width / 2 - 179, height - 26, 30, 20, Text.of("A-Z"), btn -> {
-            listProcessor.setSorter(currentSorter = ResourcePackListProcessor.sortAZ);
-        }));
+        addDrawableChild(
+                ButtonWidget.builder(Text.of("A-Z"), btn -> {
+                    listProcessor.setSorter(currentSorter = ResourcePackListProcessor.sortAZ);
+                })
+                .dimensions(width / 2 - 179, height - 26, 30, 20)
+                .build()
+        );
 
-        addDrawableChild(new ButtonWidget(width / 2 - 179 + 34, height - 26, 30, 20, Text.of("Z-A"), btn -> {
-            listProcessor.setSorter(currentSorter = ResourcePackListProcessor.sortZA);
-        }));
+        addDrawableChild(
+                ButtonWidget.builder(Text.of("Z-A"), btn -> {
+                    listProcessor.setSorter(currentSorter = ResourcePackListProcessor.sortZA);
+                })
+                .dimensions(width / 2 - 179 + 34, height - 26, 30, 20)
+                .build()
+        );
 
-        addDrawableChild(new ButtonWidget(width / 2 - 179 + 68, height - 26, 86, 20, Text.of(folderView ? "Folder View" : "Flat View"), btn -> {
-            folderView = !folderView;
-            btn.setMessage(Text.of(folderView ? "Folder View" : "Flat View"));
+        addDrawableChild(
+                ButtonWidget.builder(Text.of(folderView ? "Folder View" : "Flat View"), btn -> {
+                    folderView = !folderView;
+                    btn.setMessage(Text.of(folderView ? "Folder View" : "Flat View"));
 
-            refresh();
-            customAvailablePacks.setScrollAmount(0.0);
-        }));
+                    refresh();
+                    customAvailablePacks.setScrollAmount(0.0);
+                })
+                .dimensions(width / 2 - 179 + 68, height - 26, 86, 20)
+                .build()
+        );
 
         // Load all available packs button
         addDrawableChild(new SilentTexturedButtonWidget(width / 2 - 204, 0, 32, 32, 0, 0, WIDGETS_TEXTURE, btn -> {
@@ -110,7 +121,7 @@ public class CustomResourcePackScreen extends PackScreen {
         // Replacing the available pack list with our custom implementation
         originalAvailablePacks = availablePackList;
         remove(originalAvailablePacks);
-        addSelectableChild(customAvailablePacks = new PackListWidgetCustom(originalAvailablePacks, 200, height, width / 2 - 204));
+        addSelectableChild(customAvailablePacks = new PackListWidgetCustom(originalAvailablePacks, this, 200, height, width / 2 - 204));
         availablePackList = customAvailablePacks;
 
         listProcessor.pauseCallback();
@@ -219,6 +230,5 @@ public class CustomResourcePackScreen extends PackScreen {
     @Override
     public void removed() {
         super.removed();
-        client.keyboard.setRepeatEvents(false);
     }
 }

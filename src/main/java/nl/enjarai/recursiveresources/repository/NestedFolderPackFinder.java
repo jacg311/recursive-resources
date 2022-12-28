@@ -1,8 +1,8 @@
 package nl.enjarai.recursiveresources.repository;
 
 import net.minecraft.resource.*;
-import net.minecraft.resource.ResourcePackProfile.Factory;
 import net.minecraft.resource.ResourcePackProfile.InsertionPosition;
+import net.minecraft.text.Text;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -18,46 +18,50 @@ public class NestedFolderPackFinder implements ResourcePackProvider {
     }
 
     @Override
-    public void register(Consumer<ResourcePackProfile> profileAdder, Factory factory) {
+    public void register(Consumer<ResourcePackProfile> profileAdder) {
         File[] folders = root.listFiles(ResourcePackUtils::isFolderButNotFolderBasedPack);
 
         for (File folder : ResourcePackUtils.wrap(folders)) {
-            processFolder(folder, profileAdder, factory);
+            processFolder(folder, profileAdder);
         }
     }
 
-    public void processFolder(File folder, Consumer<ResourcePackProfile> profileAdder, Factory factory) {
+    public void processFolder(File folder, Consumer<ResourcePackProfile> profileAdder) {
         if (ResourcePackUtils.isFolderBasedPack(folder)) {
-            addPack(folder, profileAdder, factory);
+            addPack(folder, profileAdder);
             return;
         }
 
         File[] zipFiles = folder.listFiles(file -> file.isFile() && file.getName().endsWith(".zip"));
 
         for (File zipFile : ResourcePackUtils.wrap(zipFiles)) {
-            addPack(zipFile, profileAdder, factory);
+            addPack(zipFile, profileAdder);
         }
 
         File[] nestedFolders = folder.listFiles(File::isDirectory);
 
         for (File nestedFolder : ResourcePackUtils.wrap(nestedFolders)) {
-            processFolder(nestedFolder, profileAdder, factory);
+            processFolder(nestedFolder, profileAdder);
         }
     }
 
-    public void addPack(File fileOrFolder, Consumer<ResourcePackProfile> profileAdder, Factory factory) {
-        String name = "file/" + StringUtils.removeStart(fileOrFolder.getAbsolutePath().substring(rootLength).replace('\\', '/'), "/");
+    public void addPack(File fileOrFolder, Consumer<ResourcePackProfile> profileAdder) {
+//        String displayName = StringUtils.removeStart(fileOrFolder.getAbsolutePath().substring(rootLength).replace('\\', '/'), "/");
+        String displayName = fileOrFolder.getName();
+        String name = "file/" + displayName;
         ResourcePackProfile info;
 
         if (fileOrFolder.isDirectory()) {
-            info = ResourcePackProfile.of(
-                    name, false, () -> new DirectoryResourcePack(fileOrFolder),
-                    factory, InsertionPosition.TOP, ResourcePackSource.PACK_SOURCE_NONE
+            info = ResourcePackProfile.create(
+                    name, Text.literal(displayName), false,
+                    (packName) -> new DirectoryResourcePack(packName, fileOrFolder.toPath(), true),
+                    ResourceType.CLIENT_RESOURCES, InsertionPosition.TOP, ResourcePackSource.NONE
             );
         } else {
-            info = ResourcePackProfile.of(
-                    name, false, () -> new ZipResourcePack(fileOrFolder),
-                    factory, InsertionPosition.TOP, ResourcePackSource.PACK_SOURCE_NONE
+            info = ResourcePackProfile.create(
+                    name, Text.literal(displayName), false,
+                    (packName) -> new ZipResourcePack(packName, fileOrFolder, true),
+                    ResourceType.CLIENT_RESOURCES, InsertionPosition.TOP, ResourcePackSource.NONE
             );
         }
 

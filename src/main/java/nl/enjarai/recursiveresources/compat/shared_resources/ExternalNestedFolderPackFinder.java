@@ -16,12 +16,12 @@ public class ExternalNestedFolderPackFinder extends NestedFolderPackFinder {
     }
 
     @Override
-    public void register(Consumer<ResourcePackProfile> profileAdder, ResourcePackProfile.Factory factory) {
+    public void register(Consumer<ResourcePackProfile> profileAdder) {
         Path path = pathSupplier.get();
         if (path == null) return;
         root = path.toFile();
         rootLength = root.getAbsolutePath().length();
 
-        super.register(profileAdder, factory);
+        super.register(profileAdder);
     }
 }
