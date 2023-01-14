@@ -22,7 +22,6 @@ public class NestedFolderPackFinder implements ResourcePackProvider {
     public void register(Consumer<ResourcePackProfile> profileAdder) {
         try(Stream<Path> folders = Files.list(root)) {
             for (Path folder : folders.filter(ResourcePackUtils::isFolderButNotFolderBasedPack).toList()) {
-                System.out.println(folder);
                 processFolder(folder, profileAdder);
             }
         }
