@@ -32,7 +32,7 @@ public abstract class OptionsScreenMixin {
         packRoots.add(client.getResourcePackDir());
 
         if (FabricLoader.getInstance().isModLoaded("shared-resources")) {
-            var directory = GameResourceHelper.getPathFor(DefaultGameResources.RESOURCEPACKS);
+            Path directory = GameResourceHelper.getPathFor(DefaultGameResources.RESOURCEPACKS);
 
             if (directory != null) {
                 packRoots.add(directory);
@@ -41,7 +41,7 @@ public abstract class OptionsScreenMixin {
 
         return new CustomResourcePackScreen(
                 (OptionsScreen) (Object) this, client.getResourcePackManager(),
-                this::refreshResourcePacks, client.getResourcePackDir().toFile(),
+                this::refreshResourcePacks, client.getResourcePackDir(),
                 Text.translatable("resourcePack.title"),
                 packRoots
         );

@@ -38,7 +38,7 @@ public abstract class ResourcePackManagerMixin {
             var client = MinecraftClient.getInstance();
 
             providers = new HashSet<>(providers);
-            providers.add(new NestedFolderPackFinder(client.getResourcePackDir().toFile()));
+            providers.add(new NestedFolderPackFinder(client.getResourcePackDir()));
 
             // Load shared resources compat if present
             if (FabricLoader.getInstance().isModLoaded("shared-resources")) {

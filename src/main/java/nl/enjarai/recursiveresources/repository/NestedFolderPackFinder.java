@@ -1,66 +1,75 @@
 package nl.enjarai.recursiveresources.repository;
 
+import com.google.common.io.MoreFiles;
 import net.minecraft.resource.*;
 import net.minecraft.resource.ResourcePackProfile.InsertionPosition;
 import net.minecraft.text.Text;
-import org.apache.commons.lang3.StringUtils;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public class NestedFolderPackFinder implements ResourcePackProvider {
-    protected File root;
-    protected int rootLength;
+    protected Path root;
 
-    public NestedFolderPackFinder(File root) {
+    public NestedFolderPackFinder(Path root) {
         this.root = root;
-        this.rootLength = root.getAbsolutePath().length();
     }
 
     @Override
     public void register(Consumer<ResourcePackProfile> profileAdder) {
-        File[] folders = root.listFiles(ResourcePackUtils::isFolderButNotFolderBasedPack);
-
-        for (File folder : ResourcePackUtils.wrap(folders)) {
-            processFolder(folder, profileAdder);
+        try(Stream<Path> folders = Files.list(root)) {
+            for (Path folder : folders.filter(ResourcePackUtils::isFolderButNotFolderBasedPack).toList()) {
+                System.out.println(folder);
+                processFolder(folder, profileAdder);
+            }
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    public void processFolder(File folder, Consumer<ResourcePackProfile> profileAdder) {
+    public void processFolder(Path folder, Consumer<ResourcePackProfile> profileAdder) {
         if (ResourcePackUtils.isFolderBasedPack(folder)) {
             addPack(folder, profileAdder);
             return;
         }
 
-        File[] zipFiles = folder.listFiles(file -> file.isFile() && file.getName().endsWith(".zip"));
+        try (Stream<Path> elements = Files.list(folder)){
+            for (Path element : elements.toList()) {
+                if (!Files.isDirectory(element) && element.toString().endsWith(".zip")) {
+                    addPack(element, profileAdder);
+                    return;
+                }
 
-        for (File zipFile : ResourcePackUtils.wrap(zipFiles)) {
-            addPack(zipFile, profileAdder);
+                if (Files.isDirectory(element)) {
+                    processFolder(element, profileAdder);
+                }
+            }
         }
-
-        File[] nestedFolders = folder.listFiles(File::isDirectory);
-
-        for (File nestedFolder : ResourcePackUtils.wrap(nestedFolders)) {
-            processFolder(nestedFolder, profileAdder);
+        catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    public void addPack(File fileOrFolder, Consumer<ResourcePackProfile> profileAdder) {
+    public void addPack(Path fileOrFolder, Consumer<ResourcePackProfile> profileAdder) {
 //        String displayName = StringUtils.removeStart(fileOrFolder.getAbsolutePath().substring(rootLength).replace('\\', '/'), "/");
-        String displayName = fileOrFolder.getName();
+        String displayName = MoreFiles.getNameWithoutExtension(fileOrFolder);
         String name = "file/" + displayName;
         ResourcePackProfile info;
 
-        if (fileOrFolder.isDirectory()) {
+        if (Files.isDirectory(fileOrFolder)) {
             info = ResourcePackProfile.create(
                     name, Text.literal(displayName), false,
-                    (packName) -> new DirectoryResourcePack(packName, fileOrFolder.toPath(), true),
+                    (packName) -> new DirectoryResourcePack(packName, fileOrFolder, true),
                     ResourceType.CLIENT_RESOURCES, InsertionPosition.TOP, ResourcePackSource.NONE
             );
         } else {
             info = ResourcePackProfile.create(
                     name, Text.literal(displayName), false,
-                    (packName) -> new ZipResourcePack(packName, fileOrFolder, true),
+                    (packName) -> new ZipResourcePack(packName, fileOrFolder.toFile(), true),
                     ResourceType.CLIENT_RESOURCES, InsertionPosition.TOP, ResourcePackSource.NONE
             );
         }

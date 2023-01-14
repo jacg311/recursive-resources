@@ -12,7 +12,7 @@ import net.minecraft.util.Identifier;
 import nl.enjarai.recursiveresources.RecursiveResources;
 import nl.enjarai.recursiveresources.gui.CustomResourcePackScreen;
 
-import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -23,26 +23,22 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
     public static final String UP_TEXT = "..";
 
     private final CustomResourcePackScreen ownerScreen;
-    public final File folder;
+    public final Path folder;
     public final boolean isUp;
     public final List<ResourcePackEntry> children;
 
-    private static File findIconFile(List<Path> roots, File folder) {
-        for (var root : roots) {
-            var iconFile = root
-                    .resolve(folder.toPath())
-                    .resolve("icon.png")
-                    .toFile();
-
-            if (iconFile.exists()) return iconFile;
+    private static Path findIconFile(List<Path> roots, Path folder) {
+        for (Path root : roots) {
+            Path iconFile = root.resolve(folder).resolve("icon.png");
+            if (Files.exists(iconFile)) return iconFile;
         }
         return null;
     }
 
-    public ResourcePackFolderEntry(MinecraftClient client, PackListWidget list, CustomResourcePackScreen ownerScreen, File folder, boolean isUp) {
+    public ResourcePackFolderEntry(MinecraftClient client, PackListWidget list, CustomResourcePackScreen ownerScreen, Path folder, boolean isUp) {
         super(client, list, ownerScreen,
                 new FolderPack(
-                        Text.of(isUp ? UP_TEXT : folder.getName()),
+                        Text.of(isUp ? UP_TEXT : folder.toString()),
                         Text.of(isUp ? "(Back)" : "(Folder)"),
                         findIconFile(ownerScreen.roots, folder),
                         folder
@@ -54,7 +50,7 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
         this.children = isUp ? List.of() : resolveChildren();
     }
 
-    public ResourcePackFolderEntry(MinecraftClient client, PackListWidget list, CustomResourcePackScreen ownerScreen, File folder) {
+    public ResourcePackFolderEntry(MinecraftClient client, PackListWidget list, CustomResourcePackScreen ownerScreen, Path folder) {
         this(client, list, ownerScreen, folder, false);
     }
 
@@ -112,7 +108,7 @@ public class ResourcePackFolderEntry extends ResourcePackEntry {
                 .filter(entry -> {
                     var resourcePack = ((ResourcePackOrganizer.AbstractPack) entry.pack).profile.createResourcePack();
                     return ownerScreen.roots.stream().anyMatch((root) ->
-                            isChildOfFolder(root.resolve(folder.toPath()).toFile(), resourcePack)
+                            isChildOfFolder(root.resolve(folder), resourcePack)
                     );
                 })
                 .toList();

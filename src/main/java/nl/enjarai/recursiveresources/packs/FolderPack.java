@@ -12,16 +12,17 @@ import nl.enjarai.recursiveresources.RecursiveResources;
 import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class FolderPack implements ResourcePackOrganizer.Pack {
     private static final Identifier FOLDER_TEXTURE = RecursiveResources.id("textures/gui/folder.png");
     private static final Identifier OPEN_FOLDER_TEXTURE = RecursiveResources.id("textures/gui/folder_open.png");
 
-    private static Identifier loadCustomIcon(File icon, File relativeFolder) {
-        if (icon != null && icon.exists()) {
-            try (InputStream stream = icon.toURI().toURL().openStream()) {
+    private static Identifier loadCustomIcon(Path icon, Path relativeFolder) {
+        if (icon != null && Files.exists(icon)) {
+            try (InputStream is = Files.newInputStream(icon)) {
                 // Get the path relative to the resourcepacks directory
                 var relativePath = relativeFolder.toString();
 
@@ -29,7 +30,7 @@ public class FolderPack implements ResourcePackOrganizer.Pack {
                 relativePath = relativePath.toLowerCase().replaceAll("[^a-zA-Z0-9_.-]", "_");
 
                 Identifier id = new Identifier("recursiveresources", "textures/gui/custom_folders/" + relativePath + "icon.png");
-                MinecraftClient.getInstance().getTextureManager().registerTexture(id, new NativeImageBackedTexture(NativeImage.read(stream)));
+                MinecraftClient.getInstance().getTextureManager().registerTexture(id, new NativeImageBackedTexture(NativeImage.read(is)));
                 return id;
             } catch (Exception e) {
                 LogManager.getLogger(FolderPack.class).warn("Error loading custom folder icon:");
@@ -51,7 +52,7 @@ public class FolderPack implements ResourcePackOrganizer.Pack {
         this.description = description;
     }
 
-    public FolderPack(Text displayName, Text description, File folder, File relativeFolder) {
+    public FolderPack(Text displayName, Text description, Path folder, Path relativeFolder) {
         this(displayName, description);
         icon = loadCustomIcon(folder, relativeFolder);
     }

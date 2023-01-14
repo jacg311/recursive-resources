@@ -15,19 +15,20 @@ import nl.enjarai.recursiveresources.packs.ResourcePackFolderEntry;
 import nl.enjarai.recursiveresources.packs.ResourcePackListProcessor;
 import nl.enjarai.recursiveresources.repository.ResourcePackUtils;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import static nl.enjarai.recursiveresources.packs.ResourcePackFolderEntry.WIDGETS_TEXTURE;
-import static nl.enjarai.recursiveresources.repository.ResourcePackUtils.wrap;
 
 public class CustomResourcePackScreen extends PackScreen {
-    private static final File ROOT_FOLDER = new File("");
+    private final Path rootFolder;
 
     private final MinecraftClient client = MinecraftClient.getInstance();
 
@@ -38,13 +39,15 @@ public class CustomResourcePackScreen extends PackScreen {
     private PackListWidgetCustom customAvailablePacks;
     private TextFieldWidget searchField;
 
-    private File currentFolder = ROOT_FOLDER;
+    private Path currentFolder;
     private boolean folderView = true;
     public final List<Path> roots;
 
-    public CustomResourcePackScreen(Screen parent, ResourcePackManager packManager, Consumer<ResourcePackManager> applier, File mainRoot, Text title, List<Path> roots) {
-        super(parent, packManager, applier, mainRoot.toPath(), title);
+    public CustomResourcePackScreen(Screen parent, ResourcePackManager packManager, Consumer<ResourcePackManager> applier, Path mainRoot, Text title, List<Path> roots) {
+        super(parent, packManager, applier, mainRoot, title);
         this.roots = roots;
+        this.rootFolder = mainRoot;
+        this.currentFolder = mainRoot;
     }
 
     // Components
@@ -148,13 +151,13 @@ public class CustomResourcePackScreen extends PackScreen {
 
     // Processing
 
-    private File getParentFileSafe(File file) {
-        var parent = file.getParentFile();
-        return parent == null ? ROOT_FOLDER : parent;
+    private Path getParentFileSafe(Path file) {
+        Path parent = file.getParent();
+        return parent == null ? rootFolder : parent;
     }
 
     private boolean notInRoot() {
-        return folderView && !currentFolder.equals(ROOT_FOLDER);
+        return folderView && !currentFolder.equals(rootFolder);
     }
 
     private void onFiltersUpdated() {
@@ -170,20 +173,26 @@ public class CustomResourcePackScreen extends PackScreen {
             }
 
             // create entries for all the folders that aren't packs
-            var createdFolders = new ArrayList<Path>();
+            List<Path> createdFolders = new ArrayList<>();
+
             for (Path root : roots) {
-                var absolute = root.resolve(currentFolder.toPath());
+                Path absolute = root.resolve(currentFolder);
 
-                for (File folder : wrap(absolute.toFile().listFiles(ResourcePackUtils::isFolderButNotFolderBasedPack))) {
-                    var relative = root.relativize(folder.toPath().normalize());
+                try(Stream<Path> elements = Files.list(absolute)) {
 
-                    if (createdFolders.contains(relative)) {
-                        continue;
+                    for (Path folder : elements.filter(ResourcePackUtils::isFolderButNotFolderBasedPack).toList()) {
+                        Path relative = root.relativize(folder.normalize());
+
+                        if (createdFolders.contains(relative)) {
+                            continue;
+                        }
+
+                        folders.add(new ResourcePackFolderEntry(client, customAvailablePacks, this, relative));
+                        createdFolders.add(relative);
                     }
-
-                    folders.add(new ResourcePackFolderEntry(client, customAvailablePacks,
-                            this, relative.toFile()));
-                    createdFolders.add(relative);
+                }
+                catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
             }
         }
@@ -199,10 +208,10 @@ public class CustomResourcePackScreen extends PackScreen {
                 }
 
                 // if it's a pack, get the folder it's in and check that against all our roots
-                File file = ResourcePackUtils.determinePackFolder(((ResourcePackOrganizer.AbstractPack) entry.pack).profile.createResourcePack());
+                Path file = ResourcePackUtils.determinePackFolder(((ResourcePackOrganizer.AbstractPack) entry.pack).profile.createResourcePack());
                 return file == null ? !notInRoot() : roots.stream().anyMatch((root) -> {
-                    var absolute = root.resolve(currentFolder.toPath());
-                    return absolute.toFile().equals(getParentFileSafe(file));
+                    Path absolute = root.resolve(currentFolder);
+                    return absolute.equals(getParentFileSafe(file));
                 });
             }).toList();
 
@@ -213,7 +222,7 @@ public class CustomResourcePackScreen extends PackScreen {
         customAvailablePacks.setScrollAmount(customAvailablePacks.getScrollAmount());
     }
 
-    public void moveToFolder(File folder) {
+    public void moveToFolder(Path folder) {
         currentFolder = folder;
         refresh();
         customAvailablePacks.setScrollAmount(0.0);

@@ -11,7 +11,7 @@ public class ExternalNestedFolderPackFinder extends NestedFolderPackFinder {
     protected final Supplier<Path> pathSupplier;
 
     public ExternalNestedFolderPackFinder(Supplier<Path> pathSupplier) {
-        super(pathSupplier.get().toFile());
+        super(pathSupplier.get());
         this.pathSupplier = pathSupplier;
     }
 
@@ -19,8 +19,7 @@ public class ExternalNestedFolderPackFinder extends NestedFolderPackFinder {
     public void register(Consumer<ResourcePackProfile> profileAdder) {
         Path path = pathSupplier.get();
         if (path == null) return;
-        root = path.toFile();
-        rootLength = root.getAbsolutePath().length();
+        this.root = path;
 
         super.register(profileAdder);
     }
